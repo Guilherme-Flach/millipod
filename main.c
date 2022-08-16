@@ -62,10 +62,10 @@ void getInputFromKeyboard(KeyboardInput *keyboardInput) {
 }
 
 // Initializes the player
-Fazendeiro initializeFazendeiro(Vector2 position, float speed, char nome[]) {
+Fazendeiro initializeFazendeiro(Vector2 position, char nome[]) {
   Fazendeiro fazendeiro;
   fazendeiro.position = position;
-  fazendeiro.speed = speed;
+  fazendeiro.speed = 5.0f;
   strcpy(fazendeiro.nome, nome);
   fazendeiro.pontuacao = 0;
   return fazendeiro;
@@ -102,15 +102,13 @@ void drawFazendeiro(Fazendeiro fazendeiro, int currentFrame, Texture2D texture){
   Vector2 originVector;
 
   // Draws the player sprite based on its direction and animation frame
-  animationRect.x = SPRITE_SIZE *
-                    (currentFrame + (fazendeiro.direction *
-                                     NUM_ANIMATION_FRAMES));
+  animationRect.x = SPRITE_SIZE * fazendeiro.direction;
 
   // EX1 frame 0 of 1, up (1), -> get third sprite (2) (starts at 192px)
   // EX2 frame 1 of 1, down (0) -> get first sprite (0) (starts at 0px)
   // EX3 frame 1 of 1, left (2) -> get the sixth sprite (5) (starts at 384px) 
 
-  animationRect.y = 0.0f;
+  animationRect.y = SPRITE_SIZE * currentFrame;
   animationRect.width = (float) SPRITE_SIZE;
   animationRect.height = (float) SPRITE_SIZE;
 
@@ -162,17 +160,17 @@ void drawCogumelos(Cogumelo cogumelos[], int currentFrame, Texture2D texture) {
   Vector2 originVector;
 
   // Draws the mushroom sprite based on its animation frame
-  animationRect.x = SPRITE_SIZE/2 * currentFrame;
+  animationRect.x = SPRITE_SIZE * currentFrame;
   animationRect.y = 0.0f;
-  animationRect.width = (float) SPRITE_SIZE/2;
-  animationRect.height = (float) SPRITE_SIZE/2;
+  animationRect.width = (float) SPRITE_SIZE;
+  animationRect.height = (float) SPRITE_SIZE;
 
   // Shift the sprite by half its size as to draw it on its center
-  originVector.x = (float) SPRITE_SIZE * TEXTURE_SCALE / 4.0f;
-  originVector.y = (float) SPRITE_SIZE * TEXTURE_SCALE / 4.0f;
+  originVector.x = (float) SPRITE_SIZE * TEXTURE_SCALE / 2.0f;
+  originVector.y = (float) SPRITE_SIZE * TEXTURE_SCALE / 2.0f;
 
-  destRect.width = SPRITE_SIZE * TEXTURE_SCALE / 2;
-  destRect.height = SPRITE_SIZE * TEXTURE_SCALE / 2;
+  destRect.width = SPRITE_SIZE * TEXTURE_SCALE;
+  destRect.height = SPRITE_SIZE * TEXTURE_SCALE;
 
   for (i = 0; i < NUM_COGUMELOS; i++) {
     if (cogumelos[i].state == ativo) {     
@@ -197,7 +195,7 @@ void initializeGameState(GameState *gameState) {
   Vector2 playerStartingPos = {200.0f, 200.0f};
   Rectangle cogumeloSpawnArea = {SPRITE_SIZE, SPRITE_SIZE, SCREEN_WIDTH - 2 * SPRITE_SIZE, SCREEN_HEIGTH - 2 * SPRITE_SIZE};
 
-  gameState->fazendeiro = initializeFazendeiro(playerStartingPos, 2.0, "Wanderley");
+  gameState->fazendeiro = initializeFazendeiro(playerStartingPos, "Wanderley");
   initializeCogumelos(gameState->cogumelos, cogumeloSpawnArea);
 
   srand(time(0));
