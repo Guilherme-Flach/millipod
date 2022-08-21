@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "raylib.h"
+#include "raymath.h"
 
 #define SPRITE_SIZE 64
 #define ANIMATION_FPS 8.0f
@@ -10,21 +11,27 @@
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGTH 900
+#define MAX_DISTANCE SCREEN_WIDTH + SCREEN_HEIGTH
 
-#define NUM_COGUMELOS 40
+#define NUM_COGUMELOS 30
 #define NUM_TEXTURES 2
 #define NUM_ANIMATION_FRAMES 2
 
-typedef enum TextureIndex {fazendeiroTexture, cogumeloTexture};
-typedef enum Direction {baixo, cima, esquerda, direita};
-typedef enum CogumeloEstados {ativo, colhido, destruido};
+#define AIM_RADIUS SPRITE_SIZE*TEXTURE_SCALE/2
+#define COGUMELO_COLLECT_DISTANCE SCREEN_WIDTH + SCREEN_HEIGTH
+
+typedef enum RenderOrder {FAZENDEIRO_INDEX, COGUMELO_INDEX, NUM_RENDER_LAYERS}RenderIndex;
+typedef enum RenderDirections {BAIXO, CIMA, ESQUERDA, DIREITA, NUM_DIRECOES}RenderDirection;
+typedef enum CogumeloStates {ATIVO, COLHIDO}CogumeloState;
+typedef enum HitTypes {NOTHING = -1, COGUMELO, MILIPEDE, ARANHA}HitType;
 
 typedef struct {
   Vector2 position;
   float speed;
   int direction;
-  char nome[12];
-  int pontuacao;
+  Vector2 aimDirection;
+  char name[12];
+  int score;
 } Fazendeiro;
 
 typedef struct {
@@ -41,34 +48,41 @@ typedef struct {
 
 typedef struct {
   Vector2 movement;
+  Vector2 mousePosition;
   int shooting;
-} KeyboardInput;
+} PlayerInput;
 
+typedef struct {
+  float collisionDistance;
+  int targetIndex;
+  HitType collisionType;
+} RayCollision2D;
 
-// Gets info from the keyboard and updates a KeyboardInput variable (used for movement, shooting, etc.)
-void getInputFromKeyboard(KeyboardInput *keyboardInput) {
+// Gets info from the keyboard and updates a PlayerInput variable (used for movement, shooting, etc.)
+void getInputFromKeyboard(PlayerInput *playerInput) {
   // Set the x part of the movement
-  if (IsKeyDown(KEY_RIGHT)) keyboardInput->movement.x = 1.0f;
-  else if (IsKeyDown(KEY_LEFT)) keyboardInput->movement.x = -1.0f;
-  else keyboardInput->movement.x = 0;
+  if (IsKeyDown(KEY_D)) playerInput->movement.x = 1.0f;
+  else if (IsKeyDown(KEY_A)) playerInput->movement.x = -1.0f;
+  else playerInput->movement.x = 0;
 
   // Set the y part of the movement
-  if (IsKeyDown(KEY_UP)) keyboardInput->movement.y = -1.0f;
-  else if (IsKeyDown(KEY_DOWN)) keyboardInput->movement.y = 1.0f;
-  else keyboardInput->movement.y = 0;
+  if (IsKeyDown(KEY_W)) playerInput->movement.y = -1.0f;
+  else if (IsKeyDown(KEY_S)) playerInput->movement.y = 1.0f;
+  else playerInput->movement.y = 0;
 
   // Set the shooting variable
-  keyboardInput->shooting = IsKeyDown(KEY_Z);
+  playerInput->shooting = IsMouseButtonPressed(MOUSE_BUTTON_RIGHT);
+
+  // Set the aiming variable to the mouse position
+  playerInput->mousePosition = GetMousePosition();
 }
 
 // Initializes the player
-Fazendeiro initializeFazendeiro(Vector2 position, char nome[]) {
-  Fazendeiro fazendeiro;
-  fazendeiro.position = position;
-  fazendeiro.speed = 5.0f;
-  strcpy(fazendeiro.nome, nome);
-  fazendeiro.pontuacao = 0;
-  return fazendeiro;
+void initializeFazendeiro(Fazendeiro *fazendeiro, Vector2 position, char name[]) {
+  fazendeiro->position = position;
+  fazendeiro->speed = 5.0f;
+  strcpy(fazendeiro->name, name);
+  fazendeiro->score = 0;
 }
 
 // Uptades the player position
@@ -86,12 +100,21 @@ void updateFazendeiroPosition(Fazendeiro *fazendeiro, Vector2 movimento){
   	fazendeiro->position.y = SCREEN_HEIGTH - (SPRITE_SIZE * TEXTURE_SCALE)/2;
    else if (fazendeiro->position.y - (SPRITE_SIZE * TEXTURE_SCALE)/2 < 0)
   	fazendeiro->position.y = (SPRITE_SIZE * TEXTURE_SCALE)/2;
+}
 
-  // Update the player direction based on movment; 
-  if (movimento.y > 0) fazendeiro->direction = baixo;
-  else if (movimento.y < 0) fazendeiro->direction = cima;
-  else if (movimento.x > 0) fazendeiro->direction = direita;
-  else if (movimento.x < 0) fazendeiro->direction = esquerda;
+void updateFazendeiroDirection(Fazendeiro *fazendeiro, Vector2 mousePosition) {
+  // Get the vector representing the direction between the player and the mouse
+  Vector2 direction = Vector2Subtract(mousePosition, fazendeiro->position);
+  // Normalize the vector for future calculations
+  direction = Vector2Normalize(direction);
+
+  fazendeiro->aimDirection = direction;
+
+  if (direction.y <= -PI/4)  fazendeiro->direction = CIMA;
+  else if (direction.y >= PI/4) fazendeiro->direction = BAIXO;
+  else if (direction.x <= -PI/4) fazendeiro->direction = ESQUERDA;
+  else if (direction.x >= PI/4) fazendeiro->direction = DIREITA;
+  
 }
 
 
@@ -128,13 +151,8 @@ void drawFazendeiro(Fazendeiro fazendeiro, int currentFrame, Texture2D texture){
                  originVector,
                  0,
                 WHITE);
-
+  
 };
-
-// Generates a random integer between the lower and upper bounds  (inclusive)
-int generateRandom(int lowerBound, int upperBound) {
-    return lowerBound + (int) (rand() / (double) RAND_MAX * (upperBound - lowerBound + 1));
-}
 
 // Initializes all mushrooms with a random position
 void initializeCogumelos(Cogumelo cogumelos[], Rectangle coverArea) {
@@ -143,14 +161,13 @@ void initializeCogumelos(Cogumelo cogumelos[], Rectangle coverArea) {
 
   for (i = 0; i < NUM_COGUMELOS; i++) {
     // Generate a random Vector2 inside of the coverage area
-    random_x = generateRandom(coverArea.x, coverArea.x + coverArea.width);
-    random_y = generateRandom(coverArea.x, coverArea.x + coverArea.width);
+    random_x = GetRandomValue(coverArea.x, coverArea.x + coverArea.width);
+    random_y = GetRandomValue(coverArea.x, coverArea.x + coverArea.width);
 
     cogumelos[i].position.x = random_x;
     cogumelos[i].position.y = random_y;
-    cogumelos[i].state = ativo;
+    cogumelos[i].state = ATIVO;
   }
-
 }
 
 void drawCogumelos(Cogumelo cogumelos[], int currentFrame, Texture2D texture) {
@@ -173,7 +190,7 @@ void drawCogumelos(Cogumelo cogumelos[], int currentFrame, Texture2D texture) {
   destRect.height = SPRITE_SIZE * TEXTURE_SCALE;
 
   for (i = 0; i < NUM_COGUMELOS; i++) {
-    if (cogumelos[i].state == ativo) {     
+    if (cogumelos[i].state == ATIVO) {     
       destRect.x = cogumelos[i].position.x;
       destRect.y = cogumelos[i].position.y;
       
@@ -190,32 +207,79 @@ void drawCogumelos(Cogumelo cogumelos[], int currentFrame, Texture2D texture) {
   }
 }
 
+// Returns the index of the closest mushroom to the player that collides with the player
+RayCollision2D collideCogumelos(Fazendeiro fazendeiro, Cogumelo cogumelos[]) {
+  RayCollision2D returnCollision = {MAX_DISTANCE, -1, NOTHING};
+  Vector2 fazendeiroAimMaxRange = Vector2Add(fazendeiro.position, Vector2Scale(fazendeiro.aimDirection, MAX_DISTANCE));
+  float currentDistance,
+        minDistance = MAX_DISTANCE;
+  int i,
+      returnIndex = -1;
+
+  for (i = 0; i < NUM_COGUMELOS; i++) {
+    // Check if mushroom is active and in the aim line
+    if (cogumelos[i].state == ATIVO &&
+        CheckCollisionPointLine(cogumelos[i].position, fazendeiro.position, fazendeiroAimMaxRange, AIM_RADIUS))
+    {
+      currentDistance = Vector2Distance(cogumelos[i].position, fazendeiro.position);
+      // Check if it is closer than the current target
+      if (currentDistance < minDistance) {
+        // Update the return, minDistance and the closest target position
+        returnIndex = i;
+        minDistance = currentDistance;
+        returnCollision.collisionType = COGUMELO;
+      }
+    }
+  }
+
+  returnCollision.collisionDistance = minDistance;
+  returnCollision.targetIndex = returnIndex;
+
+  return returnCollision;
+}
+
+void drawShot(Vector2 origin, Vector2 target) {
+  DrawLineV(origin, target, MAGENTA);
+
+}
+
+void shoot(GameState *gameState) {
+  RayCollision2D shotCollision;
+
+  // Make a shot
+  shotCollision = collideCogumelos(gameState->fazendeiro, gameState->cogumelos);
+
+  // See if the shot actually hit something
+  if (shotCollision.collisionType != NOTHING) {
+    gameState->cogumelos[shotCollision.targetIndex].state = COLHIDO;
+    gameState->fazendeiro.score += 100;
+  }
+
+  drawShot(gameState->fazendeiro.position, Vector2Add(gameState->fazendeiro.position, Vector2Scale(gameState->fazendeiro.aimDirection, MAX_DISTANCE)));
+}
+
 // Initializer all variables related to the game state
 void initializeGameState(GameState *gameState) {
   Vector2 playerStartingPos = {200.0f, 200.0f};
-  Rectangle cogumeloSpawnArea = {SPRITE_SIZE, SPRITE_SIZE, SCREEN_WIDTH - 2 * SPRITE_SIZE, SCREEN_HEIGTH - 2 * SPRITE_SIZE};
+  Rectangle cogumeloSpawnArea = {SPRITE_SIZE, SPRITE_SIZE, SCREEN_WIDTH - 2 * SPRITE_SIZE, SCREEN_HEIGTH - 2 * SPRITE_SIZE - 100};
 
-  gameState->fazendeiro = initializeFazendeiro(playerStartingPos, "Wanderley");
+  initializeFazendeiro(&gameState->fazendeiro, playerStartingPos, "Wanderley");
   initializeCogumelos(gameState->cogumelos, cogumeloSpawnArea);
 
-  srand(time(0));
+  SetRandomSeed(time(0));
 }
 
 void initializeTextures (Texture2D textures[]) {
-  textures[fazendeiroTexture] = LoadTexture("./sprites/fazendeiro.png");
-  textures[cogumeloTexture] = LoadTexture("./sprites/cogumelo.png");
+  textures[FAZENDEIRO_INDEX] = LoadTexture("./sprites/fazendeiro.png");
+  textures[COGUMELO_INDEX] = LoadTexture("./sprites/cogumelo.png");
 }
 
 // Draws the game area
 void drawGame(GameState gameState, Texture2D textures[]) {
-  BeginDrawing();
-
-    ClearBackground(RAYWHITE);
-    drawCogumelos(gameState.cogumelos, gameState.currentAnimationFrame, textures[cogumeloTexture]);
-    drawFazendeiro(gameState.fazendeiro, gameState.currentAnimationFrame, textures[fazendeiroTexture]);
-    
-
-  EndDrawing();
+  ClearBackground(DARKPURPLE);
+  DrawText(TextFormat("Nome: %s | Pontuacao: %d", gameState.fazendeiro.name, gameState.fazendeiro.score), 0, 0, 40, WHITE);
+  drawCogumelos(gameState.cogumelos, gameState.currentAnimationFrame, textures[COGUMELO_INDEX]);
+  drawFazendeiro(gameState.fazendeiro, gameState.currentAnimationFrame, textures[FAZENDEIRO_INDEX]);    
 }
 
 void updateFrameCount(GameState *gameState)
@@ -241,7 +305,7 @@ int main(void)
 {
     // Initialization
     //--------------------------------------------------------------------------------------
-    KeyboardInput keyboardInput = {{0, 0}, 0};
+    PlayerInput playerInput = {{0, 0}, 0};
     Texture2D textures[NUM_TEXTURES];
     GameState currentGameState;
     
@@ -257,11 +321,17 @@ int main(void)
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
      	updateFrameCount(&currentGameState);   
-        getInputFromKeyboard(&keyboardInput);
-        updateFazendeiroPosition(&(currentGameState.fazendeiro), keyboardInput.movement);
-        
-        // Draw
-        drawGame(currentGameState, textures);
+      getInputFromKeyboard(&playerInput);
+      updateFazendeiroPosition(&(currentGameState.fazendeiro), playerInput.movement);
+      updateFazendeiroDirection(&(currentGameState.fazendeiro), playerInput.mousePosition);
+      BeginDrawing();
+      if (playerInput.shooting) {
+        shoot(&currentGameState);
+      }
+      
+      // Draw
+      drawGame(currentGameState, textures);
+      EndDrawing();
     }
 
     // De-Initialization
