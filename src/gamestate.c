@@ -1,52 +1,133 @@
+/* Library containing game state related functions, such as updating the game and entering pause states. */
 #include "gamestate.h"
 
-// Makes a shot from the player into its target direction
-void shoot(GAMESTATE *gameState) {
-  RAYCOLLISION2D shotCollision;
-
-  // Make a shot
-  shotCollision = collideCogumelos(gameState->fazendeiro, gameState->cogumelos);
-
-  // See if the shot actually hit something
-  if (shotCollision.collisionType != nothing) {
-    gameState->cogumelos[shotCollision.targetIndex].state = INATIVO;
-    gameState->fazendeiro.score += 100;
-  }
-
-  // Draw the shot
-  DrawLineV(gameState->fazendeiro.position, Vector2Add(gameState->fazendeiro.position, Vector2Scale(gameState->fazendeiro.aimDirection, MAX_DISTANCE)), MAGENTA);
-}
-
 // Initializer all variables related to the game state
-void initializeGameState(GAMESTATE *gameState) {
-  Vector2 playerStartingPos = {200.0f, 200.0f};
-  Rectangle cogumeloSpawnArea = {SPRITE_SIZE, SPRITE_SIZE, SCREEN_WIDTH - 2 * SPRITE_SIZE, SCREEN_HEIGTH - 2 * SPRITE_SIZE - 100};
+void initializeGameState(GAMESTATE *gameState, int numCogumelos) {
+  Vector2 playerStartingPos = {(SCREEN_WIDTH  - SPRITE_SIZE) / 2, PLAYER_UPPER_BOUND + 2 * SPRITE_SIZE};
+  Rectangle cogumeloSpawnArea = {SPRITE_SIZE, SPRITE_SIZE, SCREEN_WIDTH - 2*SPRITE_SIZE, SCREEN_HEIGTH - 2*SPRITE_SIZE};
+  gameState->harvestedCogumelos = 0;
+  gameState->remainingCogumelos = numCogumelos;
+  gameState->currentAnimationFrame = 0;
+  gameState->currentTime = 0;
 
-  initializeFazendeiro(&gameState->fazendeiro, playerStartingPos, "Wanderley");
-  initializeCogumelos(gameState->cogumelos, cogumeloSpawnArea);
-
-  SetRandomSeed(time(0));
+  initializeFazendeiro(&gameState->fazendeiro, playerStartingPos);
+  initializeCogumelos(gameState->cogumelos, cogumeloSpawnArea, numCogumelos);
 }
 
 // Draws the game area
 void drawGame(GAMESTATE gameState, Texture2D textures[]) {
+  // Draw the background
   ClearBackground(DARKPURPLE);
-  DrawText(TextFormat("Nome: %s | Pontuacao: %d", gameState.fazendeiro.name, gameState.fazendeiro.score), 0, 0, 40, WHITE);
+  // Draw the upper line
+  drawCenteredText(TextFormat("Cogumelos Colhidos: %d | Cogumelos Restantes: %d | Vidas: %d | Tiros: %d", gameState.harvestedCogumelos, gameState.remainingCogumelos, gameState.fazendeiro.vidas, gameState.fazendeiro.numTiros), 30, 0);
+
+  // Draw the mushrooms
   drawCogumelos(gameState.cogumelos, gameState.currentAnimationFrame, textures[COGUMELO_INDEX]);
-  drawFazendeiro(gameState.fazendeiro, gameState.currentAnimationFrame, textures[FAZENDEIRO_INDEX]);    
+
+  // Draw the player
+  drawFazendeiro(gameState.fazendeiro, gameState.currentAnimationFrame, textures[FAZENDEIRO_INDEX]);
+
+  // Display the limit of the player movement
+  DrawLine(0, PLAYER_UPPER_BOUND, SCREEN_WIDTH, PLAYER_UPPER_BOUND, PURPLE);
+
+  // Render additional features based on stauts
+  switch(gameState.gameStatus) {
+    case PAUSED:
+      displayPauseScreen();
+      break;
+    
+    case STARTING:
+      displayTutorial();
+      break;
+  }
 }
 
 // Updates the frame count used in animations
 void updateFrameCount(GAMESTATE *gameState)
 {
 	  // Update
-        gameState->currentTime += GetFrameTime();
-        // update current animation frames every 1/fps seconds
-        if (gameState->currentTime > 1 / ANIMATION_FPS) {
-          if (gameState->currentAnimationFrame < NUM_ANIMATION_FRAMES-1)
-            gameState->currentAnimationFrame++;
-          else gameState->currentAnimationFrame = 0;
-          gameState->currentTime = 0;
-        }
+    gameState->currentTime += GetFrameTime();
+    // update current animation frames every 1/fps seconds
+    if (gameState->currentTime > 1 / ANIMATION_FPS) {
+      if (gameState->currentAnimationFrame < NUM_ANIMATION_FRAMES-1)
+        gameState->currentAnimationFrame++;
+      else gameState->currentAnimationFrame = 0;
+      gameState->currentTime = 0;
+    }
+}
 
+// Switches the gameStatus based on current status and transitions
+void updateGameStatus(GAMESTATE *gameState, PLAYERINPUT playerInput) {
+  switch (gameState->gameStatus)
+  {
+  case STARTING:
+    // Check if any key has been pressed to start the game
+    if (Vector2LengthSqr(playerInput.movement) > 0)
+      gameState->gameStatus = RUNNING;
+    break;
+  
+  case RUNNING:
+    // Enter pause state
+    if (playerInput.pauseButtonPressed)
+      gameState->gameStatus = PAUSED;
+    break;
+  
+  case PAUSED:
+    // Exit pause state
+    if (playerInput.pauseButtonPressed)
+      gameState->gameStatus = RUNNING;
+    break;
+
+  default:
+    break;
+  }
+
+}
+
+// Runs the actual game 
+void gameRun(GAMESTATE *gameState, PLAYERINPUT playerInput) {
+  updateFazendeiroPosition(&(gameState->fazendeiro), playerInput.movement);
+  updateFazendeiroDirection(&(gameState->fazendeiro), playerInput.mousePosition);
+  // Check if the player is shooting and has ammo
+  if (playerInput.shooting && gameState->fazendeiro.numTiros > 0)
+    shoot(gameState);
+}
+
+// Update loop, switching between the multiple game states (paused, running, etc.)
+void gameLoop(GAMESTATE *gameState, PLAYERINPUT playerInput) {
+  // Read info from player
+  getInputFromPlayer(&playerInput);
+
+  // Update the game status based on player aciton
+  updateGameStatus(gameState, playerInput);
+
+  // Run the game functions if the game is running
+  if (gameState->gameStatus == RUNNING) {
+    gameRun(gameState, playerInput);
+
+    // Only update animation frames when the game is actually running
+    updateFrameCount(gameState);
+  }
+}
+
+// Loads assets, initializes variables and starts the game
+void bootGame(GAMESTATE *gameState) {
+  gameState->gameStatus = STARTING;
+  Texture2D textures[NUM_TEXTURES];
+  PLAYERINPUT playerInput;
+
+  Image tutorialImg = LoadImage("./sprites/tutorial.png");
+
+  // Initialize the game textures:
+  textures[FAZENDEIRO_INDEX] = LoadTexture("./sprites/fazendeiro.png");
+  textures[COGUMELO_INDEX] = LoadTexture("./sprites/cogumelo.png");
+  
+  // Main game loop
+  while (!WindowShouldClose())
+    {
+      BeginDrawing();
+     	gameLoop(gameState, playerInput);
+      drawGame(*gameState, textures);
+      EndDrawing();
+    }
 }

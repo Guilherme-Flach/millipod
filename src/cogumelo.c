@@ -1,13 +1,13 @@
 #include "cogumelo.h"
 
 // Initializes all mushrooms with a random position
-void initializeCogumelos(COGUMELO cogumelos[], Rectangle coverArea) {
+void initializeCogumelos(COGUMELO cogumelos[], Rectangle coverArea, int numCogumelos) {
   int i, random_x, random_y;
 
-  for (i = 0; i < NUM_COGUMELOS; i++) {
+  for (i = 0; i < numCogumelos; i++) {
     // Generate a random Vector2 inside of the coverage area
     random_x = GetRandomValue(coverArea.x, coverArea.x + coverArea.width);
-    random_y = GetRandomValue(coverArea.x, coverArea.x + coverArea.width);
+    random_y = GetRandomValue(coverArea.y, coverArea.y + coverArea.height);
 
     cogumelos[i].position.x = random_x;
     cogumelos[i].position.y = random_y;

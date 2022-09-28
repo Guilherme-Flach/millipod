@@ -1,11 +1,12 @@
 #include "fazendeiro.h"
 
 // Initializes the player
-void initializeFazendeiro(FAZENDEIRO *fazendeiro, Vector2 position, char name[]) {
+void initializeFazendeiro(FAZENDEIRO *fazendeiro, Vector2 position) {
   fazendeiro->position = position;
   fazendeiro->speed = 5.0f;
-  TextCopy(fazendeiro->name, name);
-  fazendeiro->score = 0;
+  fazendeiro->doente = 0;
+  fazendeiro->numTiros = STARTING_TIROS;
+  fazendeiro->vidas = 3;
 }
 
 
@@ -20,10 +21,10 @@ void updateFazendeiroPosition(FAZENDEIRO *fazendeiro, Vector2 movimento){
 
   fazendeiro->position.y += movimento.y * fazendeiro->speed;
   // Stop the player from going out of bounds vertically
-  if (fazendeiro->position.y + (SPRITE_SIZE * TEXTURE_SCALE)/2 > SCREEN_HEIGTH)
+  if (fazendeiro->position.y - (SPRITE_SIZE * TEXTURE_SCALE)/2 < PLAYER_UPPER_BOUND)
+  	fazendeiro->position.y = PLAYER_UPPER_BOUND + (SPRITE_SIZE * TEXTURE_SCALE)/2;
+   else if (fazendeiro->position.y + (SPRITE_SIZE * TEXTURE_SCALE)/2 > SCREEN_HEIGTH)
   	fazendeiro->position.y = SCREEN_HEIGTH - (SPRITE_SIZE * TEXTURE_SCALE)/2;
-   else if (fazendeiro->position.y - (SPRITE_SIZE * TEXTURE_SCALE)/2 < 0)
-  	fazendeiro->position.y = (SPRITE_SIZE * TEXTURE_SCALE)/2;
 }
 
 // Updates the direction at which the player is looking
@@ -79,3 +80,26 @@ void drawFazendeiro(FAZENDEIRO fazendeiro, int currentFrame, Texture2D texture){
                 WHITE);
   
 };
+
+
+// Makes a shot from the player into its target direction
+void shoot(GAMESTATE *gameState) {
+  RAYCOLLISION2D shotCollision;
+  
+  // Make a shot
+  shotCollision = collideCogumelos(gameState->fazendeiro, gameState->cogumelos);
+
+  // Remove ammo from player
+  gameState->fazendeiro.numTiros--;
+
+  // See if the shot actually hit something
+  if (shotCollision.collisionType == cogumeloHit) {
+    gameState->cogumelos[shotCollision.targetIndex].state = INATIVO;
+    gameState->harvestedCogumelos++;
+    gameState->remainingCogumelos--;
+  }
+
+  // Draw the shot
+  DrawLineV(gameState->fazendeiro.position, Vector2Add(gameState->fazendeiro.position, Vector2Scale(gameState->fazendeiro.aimDirection, MAX_DISTANCE)), MAGENTA);
+}
+

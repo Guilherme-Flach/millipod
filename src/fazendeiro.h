@@ -5,7 +5,7 @@
 #include "raylib.h"
 
 // Initializes the player
-void initializeFazendeiro(FAZENDEIRO *fazendeiro, Vector2 position, char name[]);
+void initializeFazendeiro(FAZENDEIRO *fazendeiro, Vector2 position);
 
 // Updates the player position
 void updateFazendeiroPosition(FAZENDEIRO *fazendeiro, Vector2 movimento);
@@ -15,5 +15,8 @@ void updateFazendeiroDirection(FAZENDEIRO *fazendeiro, Vector2 mousePosition);
 
 // Draws and animates the player
 void drawFazendeiro(FAZENDEIRO fazendeiro, int currentFrame, Texture2D texture);
+
+// Makes a shot from the player into its target direction
+void shoot(GAMESTATE *gameState);
 
 #endif

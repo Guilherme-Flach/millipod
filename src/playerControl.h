@@ -3,6 +3,7 @@
 
 #include "definitions.h"
 
-void getInputFromKeyboard(PLAYERINPUT *playerInput);
+// Reads input from keyboard and mouse and stores the relevant information
+void getInputFromPlayer(PLAYERINPUT *playerInput);
 
 #endif

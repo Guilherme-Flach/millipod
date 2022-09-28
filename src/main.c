@@ -7,44 +7,22 @@
 #include "cogumelo.h"
 #include "gamestate.h"
 
-// Load Textures
-void initializeTextures (Texture2D textures[]) {
-  textures[FAZENDEIRO_INDEX] = LoadTexture("./sprites/fazendeiro.png");
-  textures[COGUMELO_INDEX] = LoadTexture("./sprites/cogumelo.png");
-}
-
 int main(void)
 {
-    // Initialization
-    //--------------------------------------------------------------------------------------
-    PLAYERINPUT playerInput = {{0, 0}, 0};
-    Texture2D textures[NUM_TEXTURES];
-    GAMESTATE currentGameState;
-    
-    // Init window first, otherwise we get a segfault for trying to load textures before the GPU is ready
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGTH, "Mili-pede");
+    GAMESTATE currentGameState = {};
 
     // Initialize variables
-    initializeTextures(textures);
-    initializeGameState(&currentGameState);
+    initializeGameState(&currentGameState, NUM_COGUMELOS);
 
+    // Initialize window first, otherwise we get a segfault for trying to load textures before the GPU is ready
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGTH, "Mili-pede");
+
+    // Set the random seed for Raylib
+    SetRandomSeed(time(0));
     SetTargetFPS(60);
-    // Main game loop
-    while (!WindowShouldClose())    // Detect window close button or ESC key
-    {
-     	updateFrameCount(&currentGameState);   
-      getInputFromKeyboard(&playerInput);
-      updateFazendeiroPosition(&(currentGameState.fazendeiro), playerInput.movement);
-      updateFazendeiroDirection(&(currentGameState.fazendeiro), playerInput.mousePosition);
-      BeginDrawing();
-      if (playerInput.shooting) {
-        shoot(&currentGameState);
-      }
-      
-      // Draw
-      drawGame(currentGameState, textures);
-      EndDrawing();
-    }
+
+    // Start the game
+    bootGame(&currentGameState);
 
     // De-Initialization
     CloseWindow();        // Close window and OpenGL context

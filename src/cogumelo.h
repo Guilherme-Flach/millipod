@@ -4,7 +4,7 @@
 #include "definitions.h"
 
 // Initializes all mushrooms with a random position inside the coverArea
-void initializeCogumelos(COGUMELO cogumelos[], Rectangle coverArea);
+void initializeCogumelos(COGUMELO cogumelos[], Rectangle coverArea, int numCogumelos);
 
 // Draws all mushrooms
 void drawCogumelos(COGUMELO cogumelos[], int currentFrame, Texture2D texture);
