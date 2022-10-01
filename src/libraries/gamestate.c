@@ -13,6 +13,8 @@ void initializeGameState(GAMESTATE *gameState, int numCogumelos) {
 
   initializeFazendeiro(&gameState->fazendeiro, playerStartingPos);
   initializeCogumelos(gameState->cogumelos, cogumeloSpawnArea, numCogumelos);
+  initializeAranhas(gameState);
+  initializeMilipede(&(gameState->milipede));
 }
 
 // Draws the game area
@@ -21,6 +23,12 @@ void drawGame(GAMESTATE *gameState, Texture2D textures[]) {
   ClearBackground(DARKPURPLE);
   // Draw the upper line
   drawCenteredText(TextFormat("Cogumelos Colhidos: %d | Cogumelos Restantes: %d | Vidas: %d | Tiros: %d", gameState->harvestedCogumelos, gameState->remainingCogumelos, gameState->fazendeiro.vidas, gameState->fazendeiro.numTiros), 30, 0, WHITE);
+
+  // Draw the Spiders
+  drawSpiders(gameState->aranhas);
+
+  // Draw the Milipede
+  drawMilipede(gameState->milipede);
 
   // Draw the mushrooms
   drawCogumelos(gameState->cogumelos, gameState->currentAnimationFrame, textures[COGUMELO_INDEX]);
@@ -101,8 +109,19 @@ void updateGameStatus(GAMESTATE *gameState, PLAYERINPUT playerInput) {
 void gameRun(GAMESTATE *gameState, PLAYERINPUT playerInput) {
   updateFazendeiroPosition(&(gameState->fazendeiro), playerInput.movement);
   updateFazendeiroDirection(&(gameState->fazendeiro), playerInput.mousePosition);
+  updateFazendeiroFiringDelay(&(gameState->fazendeiro));
+
+  monsterHit(gameState);
+  updateAllSpiders(gameState->aranhas, gameState);
+  updateMilipede(&(gameState->milipede), gameState);
+
+  gameState->remainingCogumelos = countRemainingCogumelos(gameState->cogumelos, NUM_COGUMELOS);
+
+  respawnAranha(gameState->aranhas);
+  respawnMilipede(&(gameState->milipede));
+
   // Check if the player is shooting and has ammo
-  if (playerInput.shooting && gameState->fazendeiro.numTiros > 0)
+  if (playerInput.shooting && gameState->fazendeiro.numTiros > 0 && gameState->fazendeiro.firing_delay_frames <= 0)
     shoot(gameState);
 }
 
@@ -143,4 +162,27 @@ void bootGame(GAMESTATE *gameState) {
       drawGame(gameState, textures);
       EndDrawing();
     }
+}
+
+// Checks if the player has been hit by a monster
+void monsterHit(GAMESTATE *gameState) {
+    //test hit against spiders
+    if(aranhaFazendeiroCollidesAll(gameState->aranhas, gameState->fazendeiro))
+        gameState->fazendeiro.doente = 1;
+    //test hit against milipede
+    if(milipedeFazendeiroCollides(gameState->milipede, gameState->fazendeiro))
+        gameState->fazendeiro.doente = 1;
+}
+
+// Counts the number of remaining mushrooms for displaying
+int countRemainingCogumelos(COGUMELO cogumelos[], int startingCogumelo) {
+  int cogumeloIndex = 0, cogumeloCount = 0;
+
+  for (cogumeloIndex = 0; cogumeloIndex < startingCogumelo; cogumeloIndex++) {
+    if (cogumelos[cogumeloIndex].state != ATIVO) {
+      cogumeloCount++;
+    }
+  }
+
+  return startingCogumelo - cogumeloCount;
 }

@@ -7,6 +7,8 @@
 #include "cogumelo.h"
 #include "fazendeiro.h"
 #include "playerControl.h"
+#include "aranha.h"
+#include "milipede.h"
 #include "screens.h"
 
 // Initialize all variables related to the game state
@@ -29,5 +31,11 @@ void gameRun(GAMESTATE *gameState, PLAYERINPUT playerInput);
 
 // Switches the gameStatus from paused to running and vice versa, when the pause button is pressed
 void updateGameStatus(GAMESTATE *gameState, PLAYERINPUT playerInput);
+
+// Checks if the player has been hit by a monster
+void monsterHit(GAMESTATE *gameState);
+
+// Counts the number of remaining mushrooms for displaying
+int countRemainingCogumelos(COGUMELO cogumelos[], int startingCogumelos);
 
 #endif

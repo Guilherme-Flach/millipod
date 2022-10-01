@@ -81,3 +81,7 @@ RAYCOLLISION2D collideCogumelos(FAZENDEIRO fazendeiro, COGUMELO cogumelos[]) {
 
   return returnCollision;
 }
+
+void destroyCogumelo(COGUMELO * cogumelos, int index){
+    cogumelos[index].state = INATIVO;
+}

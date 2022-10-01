@@ -13,7 +13,17 @@
 #define PLAYER_UPPER_BOUND 3 * SCREEN_HEIGTH / 4
 #define MAX_DISTANCE SCREEN_WIDTH + SCREEN_HEIGTH
 
+#define ARANHA_SPEED 5
+
+#define MILIPEDE_SPEED 4
+#define MILIPEDE_DESCENT_SPEED 2
+#define MILIPEDE_FOLLOW_DISTANCE 46
+#define MILIPEDE_DESCENT_FRAMES 25
+
 #define NUM_COGUMELOS 60
+#define NUM_ARANHAS 2
+#define NUM_MAX_SEGMENTOS 10
+
 #define NUM_TEXTURES 2
 #define NUM_ANIMATION_FRAMES 2
 #define STARTING_TIROS 100
@@ -21,6 +31,12 @@
 #define AIM_RADIUS SPRITE_SIZE*TEXTURE_SCALE/2
 #define COGUMELO_COLLECT_DISTANCE SCREEN_WIDTH + SCREEN_HEIGTH
 #define PLAYER_NAME_SIZE 25
+#define FIRING_DELAY 15
+
+#define FAZENDEIRO_HITBOX_RADIUS 30
+#define MILIPEDE_HITBOX_RADIUS 30
+#define ARANHA_HITBOX_RADIUS 20
+#define COGUMELO_HITBOX_RADIUS 50
 
 typedef enum RenderOrder {FAZENDEIRO_INDEX, COGUMELO_INDEX, NUM_RENDER_LAYERS}RENDERINDEX;
 
@@ -43,8 +59,9 @@ typedef struct {
   int vidas;
   int doente;
   int numTiros;
+  int firing_delay_frames;
+  int score;
 } FAZENDEIRO;
-
 
 typedef struct {
   Vector2 position;
@@ -52,8 +69,29 @@ typedef struct {
 } COGUMELO;
 
 typedef struct {
+  Vector2 position;
+  Vector2 velocity;
+  int state;
+} ARANHA;
+
+typedef struct {
+  Vector2 position;
+  int state;
+} MILIPEDE_SEGMENT;
+
+typedef struct {
+  Vector2 position;
+  int direction;
+  int descendFrames;
+  int state;
+  MILIPEDE_SEGMENT segments[NUM_MAX_SEGMENTOS];
+} MILIPEDE_HEAD;
+
+typedef struct {
   FAZENDEIRO fazendeiro;
   COGUMELO cogumelos[NUM_COGUMELOS];
+  ARANHA aranhas[NUM_ARANHAS];
+  MILIPEDE_HEAD milipede;
   float currentTime;
   int currentAnimationFrame;
   GAMESTATUS gameStatus;

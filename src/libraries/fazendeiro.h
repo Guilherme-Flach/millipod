@@ -17,6 +17,9 @@ void updateFazendeiroDirection(FAZENDEIRO *fazendeiro, Vector2 mousePosition);
 // Draws and animates the player
 void drawFazendeiro(FAZENDEIRO fazendeiro, int currentFrame, Texture2D texture);
 
+// Updates the firing delay
+void updateFazendeiroFiringDelay(FAZENDEIRO *fazendeiro);
+
 // Makes a shot from the player into its target direction
 void shoot(GAMESTATE *gameState);
 
