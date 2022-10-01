@@ -2,10 +2,10 @@
 #include <time.h>
 #include <stdlib.h>
 #include <string.h>
-#include "fazendeiro.h"
-#include "playerControl.h"
-#include "cogumelo.h"
-#include "gamestate.h"
+#include "./libraries/fazendeiro.h"
+#include "./libraries/playerControl.h"
+#include "./libraries/cogumelo.h"
+#include "./libraries/gamestate.h"
 
 int main(void)
 {

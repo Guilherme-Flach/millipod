@@ -7,6 +7,7 @@ void initializeFazendeiro(FAZENDEIRO *fazendeiro, Vector2 position) {
   fazendeiro->doente = 0;
   fazendeiro->numTiros = STARTING_TIROS;
   fazendeiro->vidas = 3;
+  TextCopy(fazendeiro->nome, "");
 }
 
 
@@ -100,6 +101,6 @@ void shoot(GAMESTATE *gameState) {
   }
 
   // Draw the shot
-  DrawLineV(gameState->fazendeiro.position, Vector2Add(gameState->fazendeiro.position, Vector2Scale(gameState->fazendeiro.aimDirection, MAX_DISTANCE)), MAGENTA);
+  DrawLineV(gameState->fazendeiro.position, Vector2Add(gameState->fazendeiro.position, Vector2Scale(gameState->fazendeiro.aimDirection, shotCollision.collisionDistance)), MAGENTA);
 }
 

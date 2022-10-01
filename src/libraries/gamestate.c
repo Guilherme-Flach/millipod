@@ -9,35 +9,40 @@ void initializeGameState(GAMESTATE *gameState, int numCogumelos) {
   gameState->remainingCogumelos = numCogumelos;
   gameState->currentAnimationFrame = 0;
   gameState->currentTime = 0;
+  gameState->editingTextBox = 0;
 
   initializeFazendeiro(&gameState->fazendeiro, playerStartingPos);
   initializeCogumelos(gameState->cogumelos, cogumeloSpawnArea, numCogumelos);
 }
 
 // Draws the game area
-void drawGame(GAMESTATE gameState, Texture2D textures[]) {
+void drawGame(GAMESTATE *gameState, Texture2D textures[]) {
   // Draw the background
   ClearBackground(DARKPURPLE);
   // Draw the upper line
-  drawCenteredText(TextFormat("Cogumelos Colhidos: %d | Cogumelos Restantes: %d | Vidas: %d | Tiros: %d", gameState.harvestedCogumelos, gameState.remainingCogumelos, gameState.fazendeiro.vidas, gameState.fazendeiro.numTiros), 30, 0);
+  drawCenteredText(TextFormat("Cogumelos Colhidos: %d | Cogumelos Restantes: %d | Vidas: %d | Tiros: %d", gameState->harvestedCogumelos, gameState->remainingCogumelos, gameState->fazendeiro.vidas, gameState->fazendeiro.numTiros), 30, 0, WHITE);
 
   // Draw the mushrooms
-  drawCogumelos(gameState.cogumelos, gameState.currentAnimationFrame, textures[COGUMELO_INDEX]);
+  drawCogumelos(gameState->cogumelos, gameState->currentAnimationFrame, textures[COGUMELO_INDEX]);
 
   // Draw the player
-  drawFazendeiro(gameState.fazendeiro, gameState.currentAnimationFrame, textures[FAZENDEIRO_INDEX]);
+  drawFazendeiro(gameState->fazendeiro, gameState->currentAnimationFrame, textures[FAZENDEIRO_INDEX]);
 
   // Display the limit of the player movement
   DrawLine(0, PLAYER_UPPER_BOUND, SCREEN_WIDTH, PLAYER_UPPER_BOUND, PURPLE);
 
   // Render additional features based on stauts
-  switch(gameState.gameStatus) {
+  switch(gameState->gameStatus) {
     case PAUSED:
-      displayPauseScreen();
+      displayPauseScreen(gameState);
       break;
     
     case STARTING:
       displayTutorial();
+      break;
+    
+    case DISPLAYING_RANKING:
+      displayRanking(*gameState);
       break;
   }
 }
@@ -70,6 +75,8 @@ void updateGameStatus(GAMESTATE *gameState, PLAYERINPUT playerInput) {
     // Enter pause state
     if (playerInput.pauseButtonPressed)
       gameState->gameStatus = PAUSED;
+    else if (playerInput.rankingButtonPressed)
+      gameState->gameStatus = DISPLAYING_RANKING;
     break;
   
   case PAUSED:
@@ -77,6 +84,12 @@ void updateGameStatus(GAMESTATE *gameState, PLAYERINPUT playerInput) {
     if (playerInput.pauseButtonPressed)
       gameState->gameStatus = RUNNING;
     break;
+
+  case DISPLAYING_RANKING:
+  // Exit display ranking state
+  if (playerInput.rankingButtonPressed)
+      gameState->gameStatus = RUNNING;
+  break;
 
   default:
     break;
@@ -127,7 +140,7 @@ void bootGame(GAMESTATE *gameState) {
     {
       BeginDrawing();
      	gameLoop(gameState, playerInput);
-      drawGame(*gameState, textures);
+      drawGame(gameState, textures);
       EndDrawing();
     }
 }

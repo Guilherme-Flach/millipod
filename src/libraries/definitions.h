@@ -20,19 +20,26 @@
 
 #define AIM_RADIUS SPRITE_SIZE*TEXTURE_SCALE/2
 #define COGUMELO_COLLECT_DISTANCE SCREEN_WIDTH + SCREEN_HEIGTH
+#define PLAYER_NAME_SIZE 25
 
 typedef enum RenderOrder {FAZENDEIRO_INDEX, COGUMELO_INDEX, NUM_RENDER_LAYERS}RENDERINDEX;
+
 typedef enum RenderDirections {BAIXO, CIMA, ESQUERDA, DIREITA, NUM_DIRECOES}RENDERDIRECTION;
+
 typedef enum CogumeloStates {ATIVO, INATIVO}COGUMELOSTATE;
+
 typedef enum HitTypes {nothing = -1, cogumeloHit, milipedeHit, aranhaHit}HITTYPE;
-typedef enum GameStatus {STARTING, RUNNING, PAUSED, ENDING}GAMESTATUS;
+
+typedef enum GameStatus {STARTING, RUNNING, PAUSED, DISPLAYING_RANKING, ENDING}GAMESTATUS;
+
+typedef enum FileOperations {LOAD, SAVE}FILEOPERATION;
 
 typedef struct {
   Vector2 position;
   float speed;
   int direction;
   Vector2 aimDirection;
-  char name[12];
+  char nome[PLAYER_NAME_SIZE];
   int vidas;
   int doente;
   int numTiros;
@@ -52,6 +59,7 @@ typedef struct {
   GAMESTATUS gameStatus;
   int harvestedCogumelos;
   int remainingCogumelos;
+  int editingTextBox;
 } GAMESTATE;
 
 typedef struct {
@@ -59,6 +67,7 @@ typedef struct {
   Vector2 mousePosition;
   int shooting;
   int pauseButtonPressed;
+  int rankingButtonPressed;
 } PLAYERINPUT;
 
 typedef struct {

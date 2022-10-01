@@ -20,4 +20,7 @@ void getInputFromPlayer(PLAYERINPUT *playerInput) {
 
   // Check if the pause button has been pressed
   playerInput->pauseButtonPressed = IsKeyPressed(KEY_P);
+
+  // Check if player wants to see the ranking screen
+  playerInput->rankingButtonPressed = IsKeyPressed(KEY_R);
 }

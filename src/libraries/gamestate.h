@@ -13,7 +13,7 @@
 void initializeGameState(GAMESTATE *gameState, int numCogumelos);
 
 // Draws the game area
-void drawGame(GAMESTATE gameState, Texture2D textures[]);
+void drawGame(GAMESTATE *gameState, Texture2D textures[]);
 
 // Updates the frame count used in animations
 void updateFrameCount(GAMESTATE *gameState);

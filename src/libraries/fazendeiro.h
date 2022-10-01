@@ -3,6 +3,7 @@
 
 #include "definitions.h"
 #include "raylib.h"
+#include "cogumelo.h"
 
 // Initializes the player
 void initializeFazendeiro(FAZENDEIRO *fazendeiro, Vector2 position);
