@@ -80,18 +80,46 @@ void displayRanking(GAMESTATE gameState) {
   insertPlayer(playersList, currentPlayer);
   sort(playersList);
 
-  //TEMP TEMP TEMP TEMP
-  saveRanking(playersList);
-  //TEMP TEMP TEMP TEMP
-
   // Draw a dark screen
   DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGTH, BLACK);
   drawCenteredText("RANKING:", 60, 200, YELLOW);
 
   tempPlayer = playersList[playerIndex];
-  do {
-    drawCenteredText(TextFormat("%d - %s : %d", playerIndex+1, tempPlayer.nome, tempPlayer.pontuacao), 45, 200 + 50 * (playerIndex + 1), WHITE);
+  while (!isEmptyPlayer(tempPlayer) && playerIndex < NUM_PLAYERS) {
+    drawCenteredText(TextFormat("%d - %s : %d", playerIndex+1, tempPlayer.nome, tempPlayer.pontuacao), 45, 215 + 50 * (playerIndex + 1), WHITE);
     playerIndex++;
     tempPlayer = playersList[playerIndex];
-  } while (!isEmptyPlayer(tempPlayer) && playerIndex < NUM_PLAYERS);
+  }
+}
+
+// Display the ending screen
+void displayEndingScreen(GAMESTATE *gameState) {
+  JOGADOR playersList[NUM_PLAYERS];
+  JOGADOR currentPlayer, tempPlayer;
+  int playerIndex = 0;
+  const Rectangle TEXTBOX_BOUNDS = {(SCREEN_WIDTH-ELEMENT_WIDTH)/2, 630, ELEMENT_WIDTH, ELEMENT_HEIGHT};
+  const Rectangle BUTTON_BOUNDS = {(SCREEN_WIDTH-ELEMENT_WIDTH)/2, 650 + ELEMENT_HEIGHT, ELEMENT_WIDTH, ELEMENT_HEIGHT};
+  const int BUTTONBOX_WIDTH = 2 * ELEMENT_WIDTH + 15;
+
+  DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGTH, BLACK);
+  drawCenteredText("Fim de Jogo!", 80, 300, RED);
+  drawCenteredText(TextFormat("Você colheu %d cogumelos;", gameState->harvestedCogumelos), 30, 400, LIGHTGRAY);
+
+  drawCenteredText(TextFormat("Você teve que comer %d cogumelos para se curar;", gameState->eatenCogumelos), 30, 450, LIGHTGRAY);
+
+  drawCenteredText(TextFormat("Para uma pontuacao final de:", gameState->eatenCogumelos), 30, 500, LIGHTGRAY);
+
+  drawCenteredText(TextFormat("%d pontos!", gameState->harvestedCogumelos-gameState->eatenCogumelos), 70, 550, YELLOW);
+
+  // Draw the player name input box
+  DrawRectangleRec(TEXTBOX_BOUNDS, LIGHTGRAY);
+  GuiSetStyle(TEXTBOX, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
+  if(GuiTextBox(TEXTBOX_BOUNDS, gameState->fazendeiro.nome, PLAYER_NAME_SIZE, gameState->editingTextBox))
+    gameState->editingTextBox = !gameState->editingTextBox; // Switch focus in and out
+
+    // Draw the save game button
+  GuiSetStyle(BUTTON, TEXT_ALIGNMENT, TEXT_ALIGN_CENTER);
+  if (GuiButton(BUTTON_BOUNDS, GuiIconText(ICON_FILE_SAVE, "Salvar Pontuacao"))){
+    gameState->gameStatus = ENDED;
+  };
 }

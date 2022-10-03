@@ -26,12 +26,13 @@
 
 #define NUM_TEXTURES 2
 #define NUM_ANIMATION_FRAMES 2
-#define STARTING_TIROS 100
+#define STARTING_TIROS 75
 
 #define AIM_RADIUS SPRITE_SIZE*TEXTURE_SCALE/2
 #define COGUMELO_COLLECT_DISTANCE SCREEN_WIDTH + SCREEN_HEIGTH
 #define PLAYER_NAME_SIZE 25
 #define FIRING_DELAY 15
+#define PLAYER_INVUNERABILITY_FRAMES 90
 
 #define FAZENDEIRO_HITBOX_RADIUS 30
 #define MILIPEDE_HITBOX_RADIUS 30
@@ -42,11 +43,11 @@ typedef enum RenderOrder {FAZENDEIRO_INDEX, COGUMELO_INDEX, NUM_RENDER_LAYERS}RE
 
 typedef enum RenderDirections {BAIXO, CIMA, ESQUERDA, DIREITA, NUM_DIRECOES}RENDERDIRECTION;
 
-typedef enum CogumeloStates {ATIVO, INATIVO}COGUMELOSTATE;
+typedef enum ActiveStates {ACTIVE, INACTIVE}GAMEOBJECT_STATE;
 
 typedef enum HitTypes {nothing = -1, cogumeloHit, milipedeHit, aranhaHit}HITTYPE;
 
-typedef enum GameStatus {STARTING, RUNNING, PAUSED, DISPLAYING_RANKING, ENDING}GAMESTATUS;
+typedef enum GameStatus {STARTING, RUNNING, PAUSED, DISPLAYING_RANKING, ENDING, ENDED}GAMESTATUS;
 
 typedef enum FileOperations {LOAD, SAVE}FILEOPERATION;
 
@@ -60,18 +61,19 @@ typedef struct {
   int doente;
   int numTiros;
   int firing_delay_frames;
-  int score;
+  int iframes;
+  GAMEOBJECT_STATE state;
 } FAZENDEIRO;
 
 typedef struct {
   Vector2 position;
-  int state;
+  GAMEOBJECT_STATE state;
 } COGUMELO;
 
 typedef struct {
   Vector2 position;
   Vector2 velocity;
-  int state;
+  GAMEOBJECT_STATE state;
 } ARANHA;
 
 typedef struct {
@@ -97,6 +99,7 @@ typedef struct {
   GAMESTATUS gameStatus;
   int harvestedCogumelos;
   int remainingCogumelos;
+  int eatenCogumelos;
   int editingTextBox;
 } GAMESTATE;
 

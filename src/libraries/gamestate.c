@@ -7,6 +7,7 @@ void initializeGameState(GAMESTATE *gameState, int numCogumelos) {
   Rectangle cogumeloSpawnArea = {SPRITE_SIZE, SPRITE_SIZE, SCREEN_WIDTH - 2*SPRITE_SIZE, SCREEN_HEIGTH - 2*SPRITE_SIZE};
   gameState->harvestedCogumelos = 0;
   gameState->remainingCogumelos = numCogumelos;
+  gameState->eatenCogumelos = 0;
   gameState->currentAnimationFrame = 0;
   gameState->currentTime = 0;
   gameState->editingTextBox = 0;
@@ -49,8 +50,14 @@ void drawGame(GAMESTATE *gameState, Texture2D textures[]) {
       displayTutorial();
       break;
     
+    
+    case ENDED: // Also display the ranking at the end
     case DISPLAYING_RANKING:
       displayRanking(*gameState);
+      break;
+    
+    case ENDING:
+      displayEndingScreen(gameState);
       break;
   }
 }
@@ -80,9 +87,15 @@ void updateGameStatus(GAMESTATE *gameState, PLAYERINPUT playerInput) {
     break;
   
   case RUNNING:
+    // Enter ending state for quitting the game
+    if (gameState->fazendeiro.vidas <= 0 ||
+                  gameState->remainingCogumelos <= 0 ||
+                  gameState->fazendeiro.numTiros <= 0)
+    gameState->gameStatus = ENDING;
     // Enter pause state
-    if (playerInput.pauseButtonPressed)
+    else if (playerInput.pauseButtonPressed)
       gameState->gameStatus = PAUSED;
+    // Enter ranking display state
     else if (playerInput.rankingButtonPressed)
       gameState->gameStatus = DISPLAYING_RANKING;
     break;
@@ -102,7 +115,6 @@ void updateGameStatus(GAMESTATE *gameState, PLAYERINPUT playerInput) {
   default:
     break;
   }
-
 }
 
 // Runs the actual game 
@@ -110,6 +122,7 @@ void gameRun(GAMESTATE *gameState, PLAYERINPUT playerInput) {
   updateFazendeiroPosition(&(gameState->fazendeiro), playerInput.movement);
   updateFazendeiroDirection(&(gameState->fazendeiro), playerInput.mousePosition);
   updateFazendeiroFiringDelay(&(gameState->fazendeiro));
+  updateFazendeiroState(&gameState->fazendeiro);
 
   monsterHit(gameState);
   updateAllSpiders(gameState->aranhas, gameState);
@@ -148,8 +161,6 @@ void bootGame(GAMESTATE *gameState) {
   Texture2D textures[NUM_TEXTURES];
   PLAYERINPUT playerInput;
 
-  Image tutorialImg = LoadImage("./sprites/tutorial.png");
-
   // Initialize the game textures:
   textures[FAZENDEIRO_INDEX] = LoadTexture("./sprites/fazendeiro.png");
   textures[COGUMELO_INDEX] = LoadTexture("./sprites/cogumelo.png");
@@ -166,12 +177,31 @@ void bootGame(GAMESTATE *gameState) {
 
 // Checks if the player has been hit by a monster
 void monsterHit(GAMESTATE *gameState) {
-    //test hit against spiders
-    if(aranhaFazendeiroCollidesAll(gameState->aranhas, gameState->fazendeiro))
-        gameState->fazendeiro.doente = 1;
-    //test hit against milipede
-    if(milipedeFazendeiroCollides(gameState->milipede, gameState->fazendeiro))
-        gameState->fazendeiro.doente = 1;
+    // Calculate how many mushrooms the player can still eat
+    int availableCogumelos = gameState->harvestedCogumelos - gameState->eatenCogumelos;
+    
+    // Check if the player is invunerable
+    if (gameState->fazendeiro.state == ACTIVE){
+      // Check the monsters attacks against the player
+      // test hit against spiders
+      if(aranhaFazendeiroCollidesAll(gameState->aranhas, gameState->fazendeiro))
+          playerTakeDamage(&(gameState->fazendeiro), 2);
+      
+      // test hit against milipede
+      if(milipedeFazendeiroCollides(gameState->milipede, gameState->fazendeiro))
+          playerTakeDamage(&(gameState->fazendeiro), countSegments(&(gameState->milipede)));
+
+      // Check to see if the player can eat mushrooms to heal
+      if (gameState->fazendeiro.doente <= availableCogumelos) {
+        // If they do, eat the mushrooms to heal
+        gameState->eatenCogumelos += gameState->fazendeiro.doente;
+        gameState->fazendeiro.doente = 0;
+      } else {
+        // If they dont, make the player lose a life
+        gameState->fazendeiro.vidas--;
+        gameState->fazendeiro.doente = 0;
+      }
+    }
 }
 
 // Counts the number of remaining mushrooms for displaying
@@ -179,7 +209,7 @@ int countRemainingCogumelos(COGUMELO cogumelos[], int startingCogumelo) {
   int cogumeloIndex = 0, cogumeloCount = 0;
 
   for (cogumeloIndex = 0; cogumeloIndex < startingCogumelo; cogumeloIndex++) {
-    if (cogumelos[cogumeloIndex].state != ATIVO) {
+    if (cogumelos[cogumeloIndex].state != ACTIVE) {
       cogumeloCount++;
     }
   }

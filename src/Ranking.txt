@@ -1,2 +1,4 @@
-abc;42
-asasasaa;27
+Master Yoda;55
+Anakin Skywalker;30
+Luke Skywalker;19
+Jar Jar Binks;11

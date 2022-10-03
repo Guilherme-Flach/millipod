@@ -17,4 +17,7 @@ void displayTutorial();
 // Display Rankings
 void displayRanking(GAMESTATE gameState);
 
+// Display the ending screen
+void displayEndingScreen(GAMESTATE *gameState);
+
 #endif

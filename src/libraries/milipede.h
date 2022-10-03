@@ -12,13 +12,13 @@ void initializeMilipedeSegment(MILIPEDE_SEGMENT * segment);
 
 void updateMilipede(MILIPEDE_HEAD * milipede, GAMESTATE * gamestate);
 
-int testMilipedeNextFrameCollision(MILIPEDE_HEAD milipede, GAMESTATE * gamestate);
+int testMilipedeNextFrameCollision(MILIPEDE_HEAD *milipede, GAMESTATE * gamestate);
 
 int milipedeBorderCollision(Vector2 position);
 
 int milipedeCogumeloCollides(MILIPEDE_HEAD milipede, COGUMELO cogumelo);
 
-int milipedeCogumeloCollidesAll(MILIPEDE_HEAD milipede, COGUMELO cogumelos[]);
+int milipedeCogumeloCollidesAll(MILIPEDE_HEAD milipede, MILIPEDE_HEAD * real_milipede, COGUMELO cogumelos[]);
 
 int milipedeFazendeiroCollides(MILIPEDE_HEAD milipede, FAZENDEIRO player);
 
@@ -38,5 +38,10 @@ int shortenMilipede(MILIPEDE_HEAD * milipede);
 
 void respawnMilipede(MILIPEDE_HEAD * milipede);
 
+// Count the amount of segments the milipede has:
+int countSegments(MILIPEDE_HEAD *milipede);
+
+// Increase the number of segments of the milipede by 1
+void lengthenMilipede(MILIPEDE_HEAD * milipede);
 #endif
 
