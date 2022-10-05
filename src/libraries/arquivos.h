@@ -5,7 +5,6 @@
 
 #include "definitions.h"
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
 
 #define LINE_SIZE 2*PLAYER_NAME_SIZE + 1

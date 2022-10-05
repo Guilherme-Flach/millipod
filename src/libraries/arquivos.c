@@ -46,6 +46,10 @@ int loadGame(GAMESTATE *gameState) {
 // Returns the amount of players read
 int loadRankingList (JOGADOR list[]) {
     FILE *arq;
+    JOGADOR temp_player;
+    int num_players = 0;
+    char linha[LINE_SIZE];
+
     // Check to see if the ranking file is there:
     if (!FileExists(RANKING_PATH)) {
         // If it doesn't, create it and stop the execution
@@ -55,9 +59,6 @@ int loadRankingList (JOGADOR list[]) {
     }
     // If it does, load data from it
     arq = fopen(RANKING_PATH, "r");
-    JOGADOR temp_player;
-    int num_players = 0;
-    char linha[LINE_SIZE];
 
     // Se houve algum erro ao abrir o arquivo, retorna 0;
     if (ferror(arq)) {
@@ -67,8 +68,9 @@ int loadRankingList (JOGADOR list[]) {
     // Le ate chegar no final do arquivo:
     while (!feof(arq)) {
         fgets(linha, LINE_SIZE, arq);
+        if (ferror(arq)) return num_players;
         // Extrai os dados do jogador e salva-o na lista
-        strcpy(temp_player.nome, strtok(linha, ";"));
+        TextCopy(temp_player.nome, strtok(linha, ";"));
         temp_player.pontuacao = atoi(strtok(NULL, "\0"));
         list[num_players] = temp_player;
 
@@ -83,7 +85,7 @@ int loadRankingList (JOGADOR list[]) {
 
 // Verifica se o jogador dado e uma posicao vazia
 int isEmptyPlayer (JOGADOR jogador) {
-    return ((strcmp(jogador.nome, EMPTY_PLAYER.nome))
+    return ((TextIsEqual(jogador.nome, EMPTY_PLAYER.nome))
             && (jogador.pontuacao == EMPTY_PLAYER.pontuacao));
 }
 

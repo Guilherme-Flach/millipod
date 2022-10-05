@@ -94,9 +94,6 @@ void displayRanking(GAMESTATE gameState) {
 
 // Display the ending screen
 void displayEndingScreen(GAMESTATE *gameState) {
-  JOGADOR playersList[NUM_PLAYERS];
-  JOGADOR currentPlayer, tempPlayer;
-  int playerIndex = 0;
   const Rectangle TEXTBOX_BOUNDS = {(SCREEN_WIDTH-ELEMENT_WIDTH)/2, 630, ELEMENT_WIDTH, ELEMENT_HEIGHT};
   const Rectangle BUTTON_BOUNDS = {(SCREEN_WIDTH-ELEMENT_WIDTH)/2, 650 + ELEMENT_HEIGHT, ELEMENT_WIDTH, ELEMENT_HEIGHT};
   const int BUTTONBOX_WIDTH = 2 * ELEMENT_WIDTH + 15;
