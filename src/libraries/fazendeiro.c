@@ -3,10 +3,9 @@
 // Initializes the player
 void initializeFazendeiro(FAZENDEIRO *fazendeiro, Vector2 position) {
   fazendeiro->position = position;
-  fazendeiro->speed = 5.0f;
   fazendeiro->doente = 0;
   fazendeiro->numTiros = STARTING_TIROS;
-  fazendeiro->vidas = 3;
+  fazendeiro->vidas = FAZEDEIRO_STARTING_LIVES;
   fazendeiro->firing_delay_frames = 0;
   fazendeiro->iframes = 0;
   fazendeiro->state = ACTIVE;
@@ -16,14 +15,14 @@ void initializeFazendeiro(FAZENDEIRO *fazendeiro, Vector2 position) {
 // Updates the player position
 void updateFazendeiroPosition(FAZENDEIRO *fazendeiro, Vector2 movimento){
   if (fazendeiro->state == ACTIVE) {
-    fazendeiro->position.x += movimento.x * fazendeiro->speed;
+    fazendeiro->position.x += movimento.x * FAZENDEIRO_SPEED;
     // Stop the player from going out of bounds horizontally
     if (fazendeiro->position.x + (SPRITE_SIZE * TEXTURE_SCALE)/2 > SCREEN_WIDTH)
       fazendeiro->position.x = SCREEN_WIDTH - (SPRITE_SIZE * TEXTURE_SCALE)/2;
     else if (fazendeiro->position.x - (SPRITE_SIZE * TEXTURE_SCALE)/2 < 0)
       fazendeiro->position.x = (SPRITE_SIZE * TEXTURE_SCALE)/2;
 
-    fazendeiro->position.y += movimento.y * fazendeiro->speed;
+    fazendeiro->position.y += movimento.y * FAZENDEIRO_SPEED;
     // Stop the player from going out of bounds vertically
     if (fazendeiro->position.y - (SPRITE_SIZE * TEXTURE_SCALE)/2 < PLAYER_UPPER_BOUND)
       fazendeiro->position.y = PLAYER_UPPER_BOUND + (SPRITE_SIZE * TEXTURE_SCALE)/2;

@@ -39,8 +39,8 @@ void drawGame(GAMESTATE *gameState, Texture2D textures[]) {
   DrawLine(0, PLAYER_UPPER_BOUND, SCREEN_WIDTH, PLAYER_UPPER_BOUND, PURPLE);
 
   // Draw the upper line
-  drawCenteredText(TextFormat("Cogumelos Colhidos: %d | Cogumelos Restantes: %d | Cogumelos Comidos: %d", gameState->harvestedCogumelos, gameState->remainingCogumelos, gameState->eatenCogumelos), 35, 0, YELLOW);
-  drawCenteredText(TextFormat("Vidas: %d | Tiros: %d", gameState->fazendeiro.vidas, gameState->fazendeiro.numTiros), 46, 40, WHITE);
+  drawCenteredText(TextFormat("Cogumelos Colhidos: %d | Cogumelos Restantes: %d | Cogumelos Comidos: %d", gameState->harvestedCogumelos, gameState->remainingCogumelos, gameState->eatenCogumelos), 1.75*DEFAULT_FONT_SIZE, 0, YELLOW);
+  drawCenteredText(TextFormat("Vidas: %d | Tiros: %d", gameState->fazendeiro.vidas, gameState->fazendeiro.numTiros), 2.25*DEFAULT_FONT_SIZE, 40, WHITE);
 
   // Render additional features based on stauts
   switch(gameState->gameStatus) {

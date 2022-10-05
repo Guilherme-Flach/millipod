@@ -2,10 +2,9 @@
 #include <time.h>
 #include <stdlib.h>
 #include <string.h>
-#include "./libraries/fazendeiro.h"
-#include "./libraries/playerControl.h"
-#include "./libraries/cogumelo.h"
 #include "./libraries/gamestate.h"
+
+// Requisitos nao implementados: Fase 2
 
 int main(void)
 {
@@ -21,7 +20,7 @@ int main(void)
     SetRandomSeed(time(0));
     SetTargetFPS(60);
 
-    // Start the game
+    // Start & Run the game
     bootGame(&currentGameState);
     // De-Initialization
     CloseWindow(); // Close window and OpenGL context

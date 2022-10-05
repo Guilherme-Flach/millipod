@@ -11,12 +11,12 @@ void initializeAranhas(GAMESTATE * gamestate){
 // Initializes a spider
 void initializeAranha(ARANHA * aranha){
         aranha->position.x = GetRandomValue(2*ARANHA_HITBOX_RADIUS, SCREEN_WIDTH - 2*ARANHA_HITBOX_RADIUS);
-        aranha->position.y = -60;
+        aranha->position.y = ARANHA_STARTING_Y;
         if(GetRandomValue(0,3) % 2)
-            aranha->velocity.x = 5;
+            aranha->velocity.x = ARANHA_SPEED;
         else
-            aranha->velocity.x = -5;
-        aranha->velocity.y = 5;
+            aranha->velocity.x = -ARANHA_SPEED;
+        aranha->velocity.y = ARANHA_SPEED;
         aranha->state = ACTIVE;
 }
 

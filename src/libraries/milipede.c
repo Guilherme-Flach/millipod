@@ -4,10 +4,10 @@ void initializeMilipede(MILIPEDE_HEAD * milipede){
     int index;
 
     milipede->position.x = GetRandomValue(2*MILIPEDE_HITBOX_RADIUS, SCREEN_WIDTH - 2*MILIPEDE_HITBOX_RADIUS);
-    milipede->position.y = -50;
+    milipede->position.y = MILIPEDE_STARTING_Y;
     milipede->direction = 1;
     milipede->state = ACTIVE;
-    milipede->descendFrames = 30;
+    milipede->descendFrames = MILIPEDE_DESCENT_FRAMES;
     for(index=0; index < NUM_MAX_SEGMENTOS; index++)
     {
         initializeMilipedeSegment(&milipede->segments[index]);
@@ -17,8 +17,8 @@ void initializeMilipede(MILIPEDE_HEAD * milipede){
 
 void initializeMilipedeSegment(MILIPEDE_SEGMENT * segment){
     segment->state = ACTIVE;
-    segment->position.x = -100;
-    segment->position.y = -100;
+    segment->position.x = OFF_SCREEN_XY;
+    segment->position.y = OFF_SCREEN_XY;
 }
 void updateMilipede(MILIPEDE_HEAD * milipede, GAMESTATE * gamestate){
     if(milipede->state == INACTIVE)
@@ -53,7 +53,7 @@ void updateMilipede(MILIPEDE_HEAD * milipede, GAMESTATE * gamestate){
     updateSegments(milipede);
 
     // Kills the milipede if it goes below the screen
-    if(milipede->position.y > SCREEN_HEIGTH + 50)
+    if(milipede->position.y > SCREEN_HEIGTH + KILL_ZONE)
         milipede->state = INACTIVE;
 }
 
@@ -62,7 +62,7 @@ void updateSegments(MILIPEDE_HEAD * milipede){
 
     segmentFollow(&milipede->segments[0], milipede->position);
     //gets the angle between the head and the first segment using atan2f, and then corrects it to work in degrees
-    milipede->segments[0].angle = 90 + atan2f( milipede->segments[0].position.x - milipede->position.x , milipede->segments[0].position.y - milipede->position.y) * (-360 / (2 * 3.1415));
+    milipede->segments[0].angle = 90 + atan2f( milipede->segments[0].position.x - milipede->position.x , milipede->segments[0].position.y - milipede->position.y) * (-360 / (2 * PI));
 
     while(index < NUM_MAX_SEGMENTOS){
         segmentFollow(&milipede->segments[index], milipede->segments[index - 1].position);
@@ -95,7 +95,7 @@ int testMilipedeNextFrameCollision(MILIPEDE_HEAD *milipede, GAMESTATE * gamestat
 
 int milipedeBorderCollision(Vector2 position){
 
-    if(position.x < 0 || position.x > SCREEN_WIDTH - 30)
+    if(position.x < 0 || position.x > SCREEN_WIDTH - MILIPEDE_BORDER_COLLIDE_X)
         return 1;
     return 0;
 
@@ -247,7 +247,7 @@ int shortenMilipede(MILIPEDE_HEAD * milipede){
     int index = 0;
     if(milipede->segments[0].state == INACTIVE){
         milipede->state = INACTIVE;
-        return 300;
+        return MILIPEDE_HEAD_SCORE;
     }
     // Travels the segments until the last one, be that the max number of segments or the last active segment
     while(index < NUM_MAX_SEGMENTOS && milipede->segments[index].state == ACTIVE){
@@ -255,7 +255,7 @@ int shortenMilipede(MILIPEDE_HEAD * milipede){
     }
     milipede->segments[index - 1].state = INACTIVE;
 
-    return 250;
+    return MILIPEDE_SEGMENT_SCORE;
 }
 void lengthenMilipede(MILIPEDE_HEAD * milipede) {
     int index = 0;

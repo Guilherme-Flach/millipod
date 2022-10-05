@@ -1,9 +1,11 @@
 /* Helper library for displaying info sreens like pause and tutorial */
 #include "arquivos.h"
+#include "definitions.h"
 
 #ifndef SCREENS_H
 #define SCREENS_H
-#include "definitions.h"
+
+#define SPACING 5
 
 // Draws text vertically centered on the screen
 void drawCenteredText(const char text[], int fontSize, int posY, Color color);

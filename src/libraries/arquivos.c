@@ -50,6 +50,8 @@ int loadRankingList (JOGADOR list[]) {
     int num_players = 0;
     char linha[LINE_SIZE];
 
+    initializeList(list);
+
     // Check to see if the ranking file is there:
     if (!FileExists(RANKING_PATH)) {
         // If it doesn't, create it and stop the execution
@@ -65,6 +67,7 @@ int loadRankingList (JOGADOR list[]) {
         fclose(arq);
         return 0;
     }
+
     // Le ate chegar no final do arquivo:
     while (!feof(arq)) {
         fgets(linha, LINE_SIZE, arq);
@@ -119,7 +122,7 @@ int insertPlayer(JOGADOR list[], JOGADOR player) {
 
 // Verifica se dois jogadores possuem o mesmo nome
 int equalName (JOGADOR player1, JOGADOR player2) {
-    return !strcmp(player1.nome, player2.nome);
+    return !TextIsEqual(player1.nome, player2.nome);
 }
 
 // Passa por uma dada lista e retorna o indice da primeira instancia do jogador, ou NOT_FOUND se o jogador nao foi encontrado

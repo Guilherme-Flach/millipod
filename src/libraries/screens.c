@@ -19,33 +19,32 @@ void displayTutorial() {
   // Draw a black box with text inside
   DrawRectangleV((Vector2){0, RECT_START_Y}, (Vector2){SCREEN_WIDTH, RECT_HEIGHT}, DARKGRAY);
 
-  drawCenteredText("Controles:", 60, RECT_START_Y, WHITE);
-  drawCenteredText("Movimento: W A S D!", 40, RECT_START_Y + ELEMENT_HEIGHT + 5, WHITE);
+  drawCenteredText("Controles:", 3*DEFAULT_FONT_SIZE, RECT_START_Y, WHITE);
+  drawCenteredText("Movimento: W A S D!", DEFAULT_FONT_SIZE, RECT_START_Y + ELEMENT_HEIGHT + SPACING, WHITE);
 
-  drawCenteredText("Mirar e Atirar: Botao esquerdo do mouse!", 40, RECT_START_Y + 2 * ELEMENT_HEIGHT + 5, WHITE);
+  drawCenteredText("Mirar e Atirar: Botao esquerdo do mouse!", 1.5*DEFAULT_FONT_SIZE, RECT_START_Y + 2 * ELEMENT_HEIGHT + SPACING, WHITE);
 
-  drawCenteredText("Pausar: P | Ranking: R", 40, RECT_START_Y + 5 + 3 * ELEMENT_HEIGHT + 5, WHITE);
+  drawCenteredText("Pausar: P | Ranking: R", 1.5*DEFAULT_FONT_SIZE, RECT_START_Y + 3 * ELEMENT_HEIGHT + 2 * SPACING, WHITE);
 
-  drawCenteredText("Pressione qualquer movimento para comecar!", 25, RECT_START_Y + RECT_HEIGHT - ELEMENT_HEIGHT + 5, WHITE);
+  drawCenteredText("Pressione qualquer movimento para comecar!", 1.25*DEFAULT_FONT_SIZE, RECT_START_Y + RECT_HEIGHT - ELEMENT_HEIGHT + SPACING, WHITE);
 }
 
 // Display the pause screen and starts the load/save game data 
 void displayPauseScreen(GAMESTATE *gameState) {
   // Constants for clearance on drawing
-  const Rectangle TEXTBOX_BOUNDS = {(SCREEN_WIDTH-ELEMENT_WIDTH)/2, RECT_START_Y+2*ELEMENT_HEIGHT + 15, ELEMENT_WIDTH, ELEMENT_HEIGHT};
-  const int BUTTONBOX_WIDTH = 2 * ELEMENT_WIDTH + 15;
+  const Rectangle TEXTBOX_BOUNDS = {(SCREEN_WIDTH-ELEMENT_WIDTH)/2, RECT_START_Y + 2*ELEMENT_HEIGHT + 3*SPACING, ELEMENT_WIDTH, ELEMENT_HEIGHT};
+  const int BUTTONBOX_WIDTH = 2 * ELEMENT_WIDTH + 3*SPACING;
 
-  const Rectangle BUTTON1_BOUNDS = {SCREEN_WIDTH/2 + 15, 
-  RECT_START_Y + 3*ELEMENT_HEIGHT + 30, ELEMENT_WIDTH, ELEMENT_HEIGHT};
+  const Rectangle BUTTON1_BOUNDS = {SCREEN_WIDTH/2 + 3*SPACING, RECT_START_Y + 3*ELEMENT_HEIGHT + 6*SPACING, ELEMENT_WIDTH, ELEMENT_HEIGHT};
 
-  const Rectangle BUTTON2_BOUNDS = {(SCREEN_WIDTH - BUTTONBOX_WIDTH)/2, RECT_START_Y + 3*ELEMENT_HEIGHT + 30, ELEMENT_WIDTH, ELEMENT_HEIGHT};
+  const Rectangle BUTTON2_BOUNDS = {(SCREEN_WIDTH - BUTTONBOX_WIDTH)/2, RECT_START_Y + 3*ELEMENT_HEIGHT + 6*SPACING, ELEMENT_WIDTH, ELEMENT_HEIGHT};
 
   // Draw a black box with text inside
   DrawRectangleV((Vector2){0, RECT_START_Y}, (Vector2){SCREEN_WIDTH, RECT_HEIGHT},BLACK);
 
   // Draw text for unpausing
-  drawCenteredText("Jogo Pausado - Pressione P para continuar.", 40, RECT_START_Y + 5, YELLOW);
-  drawCenteredText("Ou digite seu nome para salvar/carregar um jogo.", 40, RECT_START_Y + 55, LIGHTGRAY);
+  drawCenteredText("Jogo Pausado - Pressione P para continuar.", 1.5*DEFAULT_FONT_SIZE, RECT_START_Y + SPACING, YELLOW);
+  drawCenteredText("Ou digite seu nome para salvar/carregar um jogo.", 1.5*DEFAULT_FONT_SIZE, RECT_START_Y + 11*SPACING, LIGHTGRAY);
 
   // Draw the player name input box
   DrawRectangleRec(TEXTBOX_BOUNDS, LIGHTGRAY);
@@ -72,7 +71,7 @@ void displayRanking(GAMESTATE gameState) {
   int playerIndex = 0;
 
   // Copy the current player's info
-  strcpy(currentPlayer.nome, gameState.fazendeiro.nome);
+  TextCopy(currentPlayer.nome, gameState.fazendeiro.nome);
   currentPlayer.pontuacao = gameState.harvestedCogumelos;
 
   initializeList(playersList);
@@ -86,7 +85,7 @@ void displayRanking(GAMESTATE gameState) {
 
   tempPlayer = playersList[playerIndex];
   while (!isEmptyPlayer(tempPlayer) && playerIndex < NUM_PLAYERS) {
-    drawCenteredText(TextFormat("%d - %s : %d", playerIndex+1, tempPlayer.nome, tempPlayer.pontuacao), 45, 215 + 50 * (playerIndex + 1), WHITE);
+    drawCenteredText(TextFormat("%d - %s : %d", playerIndex+1, tempPlayer.nome, tempPlayer.pontuacao), 1.5*DEFAULT_FONT_SIZE, 215 + 10*SPACING * (playerIndex + 1), WHITE);
     playerIndex++;
     tempPlayer = playersList[playerIndex];
   }
@@ -96,17 +95,17 @@ void displayRanking(GAMESTATE gameState) {
 void displayEndingScreen(GAMESTATE *gameState) {
   const Rectangle TEXTBOX_BOUNDS = {(SCREEN_WIDTH-ELEMENT_WIDTH)/2, 630, ELEMENT_WIDTH, ELEMENT_HEIGHT};
   const Rectangle BUTTON_BOUNDS = {(SCREEN_WIDTH-ELEMENT_WIDTH)/2, 650 + ELEMENT_HEIGHT, ELEMENT_WIDTH, ELEMENT_HEIGHT};
-  const int BUTTONBOX_WIDTH = 2 * ELEMENT_WIDTH + 15;
+  const int BUTTONBOX_WIDTH = 2 * ELEMENT_WIDTH + 3*SPACING;
 
   DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGTH, BLACK);
-  drawCenteredText("Fim de Jogo!", 80, 300, RED);
-  drawCenteredText(TextFormat("Você colheu %d cogumelos;", gameState->harvestedCogumelos), 30, 400, LIGHTGRAY);
+  drawCenteredText("Fim de Jogo!", 4*DEFAULT_FONT_SIZE, 300, RED);
+  drawCenteredText(TextFormat("Você colheu %d cogumelos;", gameState->harvestedCogumelos), 1.5*DEFAULT_FONT_SIZE, 400, LIGHTGRAY);
 
-  drawCenteredText(TextFormat("Você teve que comer %d cogumelos para se curar;", gameState->eatenCogumelos), 30, 450, LIGHTGRAY);
+  drawCenteredText(TextFormat("Você teve que comer %d cogumelos para se curar;", gameState->eatenCogumelos), 1.5*DEFAULT_FONT_SIZE, 450, LIGHTGRAY);
 
-  drawCenteredText(TextFormat("Para uma pontuacao final de:", gameState->eatenCogumelos), 30, 500, LIGHTGRAY);
+  drawCenteredText(TextFormat("Para uma pontuacao final de:", gameState->eatenCogumelos), 1.5*DEFAULT_FONT_SIZE, 500, LIGHTGRAY);
 
-  drawCenteredText(TextFormat("%d pontos!", gameState->harvestedCogumelos-gameState->eatenCogumelos), 70, 550, YELLOW);
+  drawCenteredText(TextFormat("%d pontos!", gameState->harvestedCogumelos-gameState->eatenCogumelos), 3.5*DEFAULT_FONT_SIZE, 550, YELLOW);
 
   // Draw the player name input box
   DrawRectangleRec(TEXTBOX_BOUNDS, LIGHTGRAY);
