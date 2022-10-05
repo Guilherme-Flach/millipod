@@ -21,7 +21,7 @@ void initializeGameState(GAMESTATE *gameState, int numCogumelos) {
 // Draws the game area
 void drawGame(GAMESTATE *gameState, Texture2D textures[]) {
   // Draw the background
-  ClearBackground(DARKPURPLE);
+  ClearBackground(DARKGREEN);
 
  // Draw the Spiders
   drawSpiders(gameState->aranhas, gameState->currentAnimationFrame, textures[ARANHA_INDEX]);
@@ -36,7 +36,7 @@ void drawGame(GAMESTATE *gameState, Texture2D textures[]) {
   drawFazendeiro(gameState->fazendeiro, gameState->currentAnimationFrame, textures[FAZENDEIRO_INDEX]);
 
   // Display the limit of the player movement
-  DrawLine(0, PLAYER_UPPER_BOUND, SCREEN_WIDTH, PLAYER_UPPER_BOUND, PURPLE);
+  DrawLine(0, PLAYER_UPPER_BOUND, SCREEN_WIDTH, PLAYER_UPPER_BOUND, GREEN);
 
   // Draw the upper line
   drawCenteredText(TextFormat("Cogumelos Colhidos: %d | Cogumelos Restantes: %d | Cogumelos Comidos: %d", gameState->harvestedCogumelos, gameState->remainingCogumelos, gameState->eatenCogumelos), 1.75*DEFAULT_FONT_SIZE, 0, YELLOW);
