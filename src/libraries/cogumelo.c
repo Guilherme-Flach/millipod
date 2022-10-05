@@ -8,7 +8,6 @@ void initializeCogumelos(COGUMELO cogumelos[], Rectangle coverArea, int numCogum
     // Generate a random Vector2 inside of the coverage area
     random_x = GetRandomValue(coverArea.x, coverArea.x + coverArea.width);
     random_y = GetRandomValue(coverArea.y, coverArea.y + coverArea.height);
-
     cogumelos[i].position.x = random_x;
     cogumelos[i].position.y = random_y;
     cogumelos[i].state = ACTIVE;
@@ -18,35 +17,12 @@ void initializeCogumelos(COGUMELO cogumelos[], Rectangle coverArea, int numCogum
 // Draws all mushrooms
 void drawCogumelos(COGUMELO cogumelos[], int currentFrame, Texture2D texture) {
   int i;
-  Rectangle animationRect;
-  Rectangle destRect;
-  Vector2 originVector;
-
   // Draws the mushroom sprite based on its animation frame
-  animationRect.x = SPRITE_SIZE * currentFrame;
-  animationRect.y = 0.0f;
-  animationRect.width = (float) SPRITE_SIZE;
-  animationRect.height = (float) SPRITE_SIZE;
-
-  // Shift the sprite by half its size as to draw it on its center
-  originVector.x = (float) SPRITE_SIZE * TEXTURE_SCALE / 2.0f;
-  originVector.y = (float) SPRITE_SIZE * TEXTURE_SCALE / 2.0f;
-
-  destRect.width = SPRITE_SIZE * TEXTURE_SCALE;
-  destRect.height = SPRITE_SIZE * TEXTURE_SCALE;
-
-  for (i = 0; i < NUM_COGUMELOS; i++) {
-    if (cogumelos[i].state == ACTIVE) {     
-      destRect.x = cogumelos[i].position.x;
-      destRect.y = cogumelos[i].position.y;
-      
-      DrawCircle(cogumelos[i].position.x, cogumelos[i].position.y, 32, GREEN);
-      DrawTexturePro(texture,
-                    animationRect,
-                    destRect,
-                    originVector,
-                    0,
-                    WHITE);
+   for (i = 0; i < NUM_COGUMELOS; i++) {
+    if (cogumelos[i].state == ACTIVE) {
+      //DrawCircle(cogumelos[i].position.x, cogumelos[i].position.y, 32, GREEN);
+      drawSprite(texture, cogumelos[i].position, 0, currentFrame, 0, 1);
+      drawSprite(texture, cogumelos[i].position, 0, currentFrame, 0, 0);
     }
   }
 }

@@ -5,6 +5,7 @@
 #include "definitions.h"
 #include "raylib.h"
 #include "cogumelo.h"
+#include "render.h"
 
 void initializeMilipede(MILIPEDE_HEAD * milipede);
 
@@ -30,7 +31,9 @@ void updateSegments(MILIPEDE_HEAD * milipede);
 
 void killMilipede(GAMESTATE * gamestate);
 
-void drawMilipede(MILIPEDE_HEAD milipede);
+void drawMilipede(MILIPEDE_HEAD milipede, int currentFrame, Texture2D texture);
+
+void drawMilipedeSegment(MILIPEDE_SEGMENT segment, int currentFrame, Texture2D texture);
 
 void collideMilipede(FAZENDEIRO fazendeiro, MILIPEDE_HEAD milipede, RAYCOLLISION2D * collision);
 

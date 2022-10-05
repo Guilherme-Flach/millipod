@@ -4,6 +4,7 @@
 #include "definitions.h"
 #include "raylib.h"
 #include "cogumelo.h"
+#include "render.h"
 
 void initializeAranhas(GAMESTATE * gamestate);
 
@@ -28,7 +29,7 @@ int aranhaFazendeiroCollides(ARANHA aranha, FAZENDEIRO player);
 
 int aranhaFazendeiroCollidesAll(ARANHA aranhas[], FAZENDEIRO player);
 
-void drawSpiders(ARANHA aranhas[]);
+void drawSpiders(ARANHA aranhas[], int currentFrame, Texture2D texture);
 
 void collideAranhas(FAZENDEIRO fazendeiro, ARANHA aranhas[], RAYCOLLISION2D * collision);
 

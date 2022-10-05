@@ -36,10 +36,13 @@ void updateMilipede(MILIPEDE_HEAD * milipede, GAMESTATE * gamestate){
         //descend
         milipede->position.y += MILIPEDE_DESCENT_SPEED;
         milipede->descendFrames -= 1;
+        //angle
+        milipede->angle = 90; //facing down
     }
     else {
         //move normally
         milipede->position.x += milipede->direction * MILIPEDE_SPEED;
+        milipede->angle = 90 + milipede->direction * -90;
     }
 
     // Check if milipede has gone all the way to the bottom
@@ -48,15 +51,23 @@ void updateMilipede(MILIPEDE_HEAD * milipede, GAMESTATE * gamestate){
     }
 
     updateSegments(milipede);
+
+    // Kills the milipede if it goes below the screen
+    if(milipede->position.y > SCREEN_HEIGTH + 50)
+        milipede->state = INACTIVE;
 }
 
 void updateSegments(MILIPEDE_HEAD * milipede){
     int index = 1;
 
     segmentFollow(&milipede->segments[0], milipede->position);
+    //gets the angle between the head and the first segment using atan2f, and then corrects it to work in degrees
+    milipede->segments[0].angle = 90 + atan2f( milipede->segments[0].position.x - milipede->position.x , milipede->segments[0].position.y - milipede->position.y) * (-360 / (2 * 3.1415));
 
     while(index < NUM_MAX_SEGMENTOS){
         segmentFollow(&milipede->segments[index], milipede->segments[index - 1].position);
+        //gets the angle between the segment and the previous segment using atan2f, and then corrects it to work in degrees
+        milipede->segments[index].angle = 90 + atan2f( milipede->segments[index].position.x - milipede->segments[index-1].position.x  , milipede->segments[index].position.y - milipede->segments[index-1].position.y) * (-360 / (2 * 3.1415));
         index++;
     }
 
@@ -96,7 +107,7 @@ int milipedeCogumeloCollides(MILIPEDE_HEAD milipede, COGUMELO cogumelo){
 
     if(CheckCollisionCircles(milipede.position, MILIPEDE_HITBOX_RADIUS, cogumelo.position, COGUMELO_HITBOX_RADIUS))
         return 1;
-    
+
     return 0;
 
 }
@@ -178,24 +189,33 @@ void segmentMoveTo(MILIPEDE_SEGMENT * segment, Vector2 prev){
     //segment->position.y = 300;
 }
 
-void drawMilipede(MILIPEDE_HEAD milipede){
+void drawMilipede(MILIPEDE_HEAD milipede, int currentFrame, Texture2D texture){
     int index = 0;
 
     if(milipede.state == ACTIVE){
-    //draw the head
-        //DrawText("o", milipede.position.x, milipede.position.y, 80, YELLOW);
-        DrawCircleV(milipede.position, 30, YELLOW);
 
     //draw the body
         while(index < NUM_MAX_SEGMENTOS){
             if(milipede.segments[index].state == ACTIVE)
-                DrawCircleV(milipede.segments[index].position, 25, YELLOW);
-            //else
-                //DrawCircleV(milipede.segments[index].position, 25, GRAY);
-
+                drawMilipedeSegment(milipede.segments[index], currentFrame, texture);
             index++;
         }
+
+                //draw the head
+        drawSprite(texture, milipede.position, milipede.angle, currentFrame, 1, 1);
+        drawSprite(texture, milipede.position, milipede.angle, currentFrame, 1, 0);
     }
+
+}
+
+void drawMilipedeSegment(MILIPEDE_SEGMENT segment, int currentFrame, Texture2D texture){
+    int pixelMod;
+
+    pixelMod = ((int)(segment.position.x + segment.position.y)/MILIPEDE_WALK_DIST_ANIM % 2);
+    //segment hitbox
+    //DrawCircleV(segment.position, 25, YELLOW);
+    drawSprite(texture, segment.position, segment.angle, pixelMod, 0, 1);
+    drawSprite(texture, segment.position, segment.angle, pixelMod, 0, 0);
 
 }
 

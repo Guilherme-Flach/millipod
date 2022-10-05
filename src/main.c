@@ -14,7 +14,7 @@ int main(void)
     // Initialize variables
     initializeGameState(&currentGameState, NUM_COGUMELOS);
 
-    // Initialize window first, otherwise we get a segfault for trying to load textures before the GPU is ready
+    // Initialize window first, otherwise we get a segfaudlt for trying to load textures before the GPU is ready
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGTH, "Mili-pede");
 
     // Set the random seed for Raylib
@@ -23,9 +23,8 @@ int main(void)
 
     // Start the game
     bootGame(&currentGameState);
-
     // De-Initialization
-    CloseWindow();        // Close window and OpenGL context
+    CloseWindow(); // Close window and OpenGL context
 
     return 0;
 }

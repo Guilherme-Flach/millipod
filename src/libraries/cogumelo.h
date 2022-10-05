@@ -2,6 +2,7 @@
 #define COGUMELO_H
 
 #include "definitions.h"
+#include "render.h"
 
 // Initializes all mushrooms with a random position inside the coverArea
 void initializeCogumelos(COGUMELO cogumelos[], Rectangle coverArea, int numCogumelos);

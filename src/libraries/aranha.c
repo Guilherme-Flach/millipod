@@ -137,15 +137,17 @@ int aranhaFazendeiroCollidesAll(ARANHA aranhas[], FAZENDEIRO player){
     return 0;
 }
 
-void drawSpiders(ARANHA aranhas[]){
+void drawSpiders(ARANHA aranhas[], int currentFrame, Texture2D texture){
     int index;
     for(index = 0; index < NUM_ARANHAS; index++)
     {
-        //DrawText("*", aranhas[index].position.x, aranhas[index].position.y, 40, WHITE);
-        if(aranhas[index].state == ACTIVE)
-            DrawCircleV(aranhas[index].position, ARANHA_HITBOX_RADIUS, PURPLE);
-    }
 
+        if(aranhas[index].state == ACTIVE) {
+            drawSprite(texture, aranhas[index].position, 0, currentFrame, 0, 1);
+            drawSprite(texture, aranhas[index].position, 0, currentFrame, 0, 0);
+
+        }
+    }
 }
 
 void collideAranhas(FAZENDEIRO fazendeiro, ARANHA aranhas[], RAYCOLLISION2D * collision){

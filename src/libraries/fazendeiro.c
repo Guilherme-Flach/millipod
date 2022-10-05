@@ -71,16 +71,10 @@ void drawFazendeiro(FAZENDEIRO fazendeiro, int currentFrame, Texture2D texture){
   originVector.x = (float) SPRITE_SIZE * TEXTURE_SCALE / 2.0f;
   originVector.y = (float) SPRITE_SIZE * TEXTURE_SCALE / 2.0f;
 
-if(fazendeiro.iframes <= 0)
-    DrawCircle(fazendeiro.position.x, fazendeiro.position.y, 32, BLUE);
-  else
-    DrawCircle(fazendeiro.position.x, fazendeiro.position.y, 32, RED);
-  DrawTexturePro(texture,
-                animationRect,
-                destRect,
-                originVector,
-                0,
-                WHITE);
+  if (fazendeiro.iframes % 2 == 0) { // Trick to make the sprite flash
+    drawSprite(texture, fazendeiro.position, 0, fazendeiro.direction, currentFrame, 1);
+    drawSprite(texture, fazendeiro.position, 0, fazendeiro.direction, currentFrame, 0);
+  }
   
 };
 

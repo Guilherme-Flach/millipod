@@ -4,7 +4,7 @@
 // Initializer all variables related to the game state
 void initializeGameState(GAMESTATE *gameState, int numCogumelos) {
   Vector2 playerStartingPos = {(SCREEN_WIDTH  - SPRITE_SIZE) / 2, PLAYER_UPPER_BOUND + 2 * SPRITE_SIZE};
-  Rectangle cogumeloSpawnArea = {SPRITE_SIZE, SPRITE_SIZE, SCREEN_WIDTH - 2*SPRITE_SIZE, SCREEN_HEIGTH - 2*SPRITE_SIZE};
+  Rectangle cogumeloSpawnArea = {SPRITE_SIZE, SPRITE_SIZE + 50, SCREEN_WIDTH - 2*SPRITE_SIZE, SCREEN_HEIGTH - 2*SPRITE_SIZE};
   gameState->harvestedCogumelos = 0;
   gameState->remainingCogumelos = numCogumelos;
   gameState->eatenCogumelos = 0;
@@ -22,14 +22,12 @@ void initializeGameState(GAMESTATE *gameState, int numCogumelos) {
 void drawGame(GAMESTATE *gameState, Texture2D textures[]) {
   // Draw the background
   ClearBackground(DARKPURPLE);
-  // Draw the upper line
-  drawCenteredText(TextFormat("Cogumelos Colhidos: %d | Cogumelos Restantes: %d | Vidas: %d | Tiros: %d", gameState->harvestedCogumelos, gameState->remainingCogumelos, gameState->fazendeiro.vidas, gameState->fazendeiro.numTiros), 30, 0, WHITE);
 
-  // Draw the Spiders
-  drawSpiders(gameState->aranhas);
+ // Draw the Spiders
+  drawSpiders(gameState->aranhas, gameState->currentAnimationFrame, textures[ARANHA_INDEX]);
 
   // Draw the Milipede
-  drawMilipede(gameState->milipede);
+  drawMilipede(gameState->milipede, gameState->currentAnimationFrame, textures[MILIPEDE_INDEX]);
 
   // Draw the mushrooms
   drawCogumelos(gameState->cogumelos, gameState->currentAnimationFrame, textures[COGUMELO_INDEX]);
@@ -39,6 +37,10 @@ void drawGame(GAMESTATE *gameState, Texture2D textures[]) {
 
   // Display the limit of the player movement
   DrawLine(0, PLAYER_UPPER_BOUND, SCREEN_WIDTH, PLAYER_UPPER_BOUND, PURPLE);
+
+  // Draw the upper line
+  drawCenteredText(TextFormat("Cogumelos Colhidos: %d | Cogumelos Restantes: %d | Cogumelos Comidos: %d", gameState->harvestedCogumelos, gameState->remainingCogumelos, gameState->eatenCogumelos), 35, 0, YELLOW);
+  drawCenteredText(TextFormat("Vidas: %d | Tiros: %d", gameState->fazendeiro.vidas, gameState->fazendeiro.numTiros), 46, 40, WHITE);
 
   // Render additional features based on stauts
   switch(gameState->gameStatus) {
@@ -162,9 +164,12 @@ void bootGame(GAMESTATE *gameState) {
   PLAYERINPUT playerInput;
 
   // Initialize the game textures:
-  textures[FAZENDEIRO_INDEX] = LoadTexture("./sprites/fazendeiro.png");
+  textures[FAZENDEIRO_INDEX] = LoadTexture("sprites/fazendeiro.png");
   textures[COGUMELO_INDEX] = LoadTexture("./sprites/cogumelo.png");
-  
+  textures[MILIPEDE_INDEX] = LoadTexture("./sprites/milipede.png");
+  textures[ARANHA_INDEX] = LoadTexture("./sprites/aranha.png");
+  textures[BACKGROUND_INDEX] = LoadTexture("./sprites/background.png");  
+
   // Main game loop
   while (!WindowShouldClose())
     {

@@ -6,6 +6,7 @@
 #include "cogumelo.h"
 #include "aranha.h"
 #include "milipede.h"
+#include "render.h"
 
 // Initializes the player
 void initializeFazendeiro(FAZENDEIRO *fazendeiro, Vector2 position);
